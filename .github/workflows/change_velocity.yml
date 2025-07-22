@@ -11,25 +11,25 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Say hello
-        run: echo "í±‹ Hello from GitHub Actions!"
+        run: echo "Hello from GitHub Actions!"
 
       - name: Simulate installing dependencies
         run: |
-          echo "í´§ Installing dependencies..."
+          echo "Installing dependencies..."
           sleep 2
           echo "âœ… Dependencies installed"
 
       - name: Simulate running tests
         run: |
-          echo "í·ª Running tests..."
+          echo "Running tests..."
           sleep 2
           echo "âœ… All tests passed"
 
       - name: Simulate build step
         run: |
-          echo "í¿—ï¸ Building the app..."
+          echo "Building the app..."
           sleep 2
           echo "âœ… Build complete"
 
       - name: Done
-        run: echo "í¾‰ Workflow finished!"
+        run: echo "Workflow finished!"
