@@ -19,17 +19,43 @@ jobs:
           sleep 2
           echo "Dependencies installed"
 
+      - name: Notify ServiceNow - Install Step
+        uses: servicenow/devops-step@v1
+        with:
+          step-name: 'install'
+
       - name: Simulate running tests
         run: |
           echo "Running tests..."
           sleep 2
           echo "All tests passed"
 
+      - name: Notify ServiceNow - Test Step
+        uses: servicenow/devops-step@v1
+        with:
+          step-name: 'test'
+
       - name: Simulate build step
         run: |
           echo "Building the app..."
           sleep 2
           echo "Build complete"
+
+      - name: Notify ServiceNow - Build Step
+        uses: servicenow/devops-step@v1
+        with:
+          step-name: 'build'
+
+      - name: Simulate deployment
+        run: |
+          echo "Deploying to staging..."
+          sleep 2
+          echo "Deployed to staging"
+
+      - name: Notify ServiceNow - Deploy Step
+        uses: servicenow/devops-step@v1
+        with:
+          step-name: 'deploy'
 
       - name: Done
         run: echo "Workflow finished!"
