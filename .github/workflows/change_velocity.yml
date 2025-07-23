@@ -17,19 +17,19 @@ jobs:
         run: |
           echo "Installing dependencies..."
           sleep 2
-          echo "✅ Dependencies installed"
+          echo "Dependencies installed"
 
       - name: Simulate running tests
         run: |
           echo "Running tests..."
           sleep 2
-          echo "✅ All tests passed"
+          echo "All tests passed"
 
       - name: Simulate build step
         run: |
           echo "Building the app..."
           sleep 2
-          echo "✅ Build complete"
+          echo "Build complete"
 
       - name: Done
         run: echo "Workflow finished!"
