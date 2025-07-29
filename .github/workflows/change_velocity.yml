@@ -1,4 +1,4 @@
-name: Hello Test
+name: prod-deployment-with-change-velocity
 
 on:
   workflow_dispatch:
@@ -15,30 +15,34 @@ jobs:
 
       - name: Simulate installing dependencies
         run: |
-          echo "Installing dependencies..."
+          echo "Installing fake dependencies..."
           sleep 2
-          echo "Dependencies installed"
+          echo "Fake dependencies installed"
 
       - name: Simulate running tests
         run: |
-          echo "Running tests..."
+          echo "Running fake tests..."
           sleep 2
-          echo "All tests passed"
+          echo "All fake tests passed"
 
       - name: Simulate build step
         run: |
-          echo "Building the app..."
+          echo "Building the fake app..."
           sleep 2
-          echo "Build complete"
+          echo "Fake build complete"
 
       - name: Done
-        run: echo "Workflow finished!"
+        run: echo "First step of workflow finished!"
 
   test-job2:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Examine code
         uses: actions/checkout@v3
 
       - name: Say hello
         run: echo "Hello from GitHub Actions - second job!"
+      
+      - name: Say goodbye
+        run: echo "Goodbye from GitHub Actions - second job!"
