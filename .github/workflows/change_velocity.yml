@@ -49,9 +49,8 @@ jobs:
         id: change_creation
         with:
           SN_INSTANCE_URL: ${{ vars.SN_INSTANCE_URL }}
-#          SN_DEVOPS_INTEGRATION_TOKEN: ${{ secrets.SN_PASSWORD }}
+          SN_USERNAME: ${{ vars.SN_USERNAME }}
           SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
-          SN_USERNAME: ${{ secrets.SN_USERNAME }}
           SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
           job-name: prod-deploy
@@ -63,15 +62,17 @@ jobs:
 
       - name: Check if change was created
         run: |
-         echo "Change creation result: ${{ steps.change_creation.outcome }}"
-         if [ "${{ steps.change_creation.outcome }}" != "success" ]; then
-          echo "ServiceNow Change creation failed. Failing workflow."
-          exit 1
-         fi
+          echo "Change creation result: ${{ steps.change_creation.outcome }}"
+          if [ "${{ steps.change_creation.outcome }}" != "success" ]; then
+            echo "ServiceNow Change creation failed. Failing workflow."
+            exit 1
+          fi
+
       - name: Log Change Request Number
         if: success()
         run: |
-         echo "Created Change: ${{ steps.change_creation.outputs.change_request_number }}"
+          echo "Created Change: ${{ steps.change_creation.outputs.change_request_number }}"
 
       - name: Say goodbye
         run: echo "Goodbye from GitHub Actions - prod-deploy job!"
+
