@@ -71,7 +71,9 @@ jobs:
       - name: Log Change Request Number
         if: success()
         run: |
-          echo "Created Change: ${{ steps.change_creation.outputs.change_request_number }}"
+         echo "Change Request Number: ${{ steps.change_creation.outputs.change_request_number }}"
+         echo "Change Request Sys ID: ${{ steps.change_creation.outputs.change_request_sys_id }}"
+         echo "Change Request URL: ${{ steps.change_creation.outputs.change_request_url }}"
 
       - name: Say goodbye
         run: echo "Goodbye from GitHub Actions - prod-deploy job!"
