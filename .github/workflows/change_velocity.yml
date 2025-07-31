@@ -34,15 +34,42 @@ jobs:
       - name: Done
         run: echo "First step of workflow finished!"
 
-  test-job2:
+  prod-deploy:
     runs-on: ubuntu-latest
-    
+    needs: test-job
     steps:
-      - name: Examine code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Say hello
-        run: echo "Hello from GitHub Actions - second job!"
-      
+        run: echo "Hello from GitHub Actions - prod-deploy job!"
+
+      - name: Trigger ServiceNow Change Control
+        uses: laplante74/laplante74-actions/servicenow-devops-change@main
+        id: change_creation
+        with:
+          SN_INSTANCE_URL: ${{ vars.SN_INSTANCE_URL }}
+          SN_DEVOPS_INTEGRATION_TOKEN: ${{ secrets.SN_PASSWORD }}
+          SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: prod-deploy
+          short-description: "Automated deployment to production via GitHub Actions."
+          implementation-plan: "Automated deployment via CI/CD pipeline."
+          description: "This deployment was triggered automatically as part of the CI/CD pipeline."
+          backout-plan: "Rollback to previous stable release."
+          test-plan: "Verify deployment success through automated tests."
+
+      - name: Check if change was created
+        run: |
+         echo "Change creation result: ${{ steps.change_creation.outcome }}"
+         if [ "${{ steps.change_creation.outcome }}" != "success" ]; then
+          echo "ServiceNow Change creation failed. Failing workflow."
+          exit 1
+         fi
+      - name: Log Change Request Number
+        if: success()
+        run: |
+         echo "Created Change: ${{ steps.change_creation.outputs.change_request_number }}"
+
       - name: Say goodbye
-        run: echo "Goodbye from GitHub Actions - second job!"
+        run: echo "Goodbye from GitHub Actions - prod-deploy job!"
