@@ -41,7 +41,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 1: Create the change request
+    - name: Set actual start time
+      run: echo "START=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")" >> $GITHUB_ENV
+
+    - name: Deploy app
+      run: |
+        echo "Deploying fake app..."
+        # Simulate failure if needed with: exit 1
+
+    - name: Set actual end time
+      run: echo "END=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")" >> $GITHUB_ENV
+
+    - name: Capture deploy status
+      if: always()
+      run: echo "DEPLOY_STATUS=${{ job.status }}" >> $GITHUB_ENV
+
+    # Create the change request
     - name: Trigger ServiceNow Change Control
       uses: laplante74/laplante74-actions/servicenow-devops-change@main
       id: change_creation
@@ -59,22 +74,7 @@ jobs:
         test-plan: "Verify deployment success through automated tests."
         assignment-group: "c26e367d9343a210cd38fde08bba10e3"
         assigned-to: "5edf55fd934b6210cd38fde08bba10a0"
-
-    # Step 2: Notify job started
-    - name: Notify ServiceNow - Job Started
-      uses: ServiceNow/servicenow-devops-change@v6.0.0
-      with:
-        instance-url: ${{ vars.SN_INSTANCE_URL }}
-        devops-integration-user-name: ${{ vars.SN_USERNAME }}
-        devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
-        tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-        context-github: ${{ toJSON(github) }}
-        job-name: prod-deploy
-        status: "started"
-    
-    # Simulated deployment
-    - name: Deploy app
-      run: echo "Fake deploy step..."
+        work-notes: "GitHub deployment result: ${{ env.DEPLOY_STATUS }}"
 
     # Complete
     - name: Say goodbye
