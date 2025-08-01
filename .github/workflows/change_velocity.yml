@@ -41,9 +41,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Say hello
-        run: echo "Hello from GitHub Actions - prod-deploy job!"
-
       - name: Trigger ServiceNow Change Control
         uses: laplante74/laplante74-actions/servicenow-devops-change@main
         id: change_creation
@@ -70,6 +67,38 @@ jobs:
             exit 1
           fi
 
-      - name: Say goodbye
-        run: echo "Goodbye from GitHub Actions - prod-deploy job!"
+      - name: Say hello
+        run: echo "Hello from GitHub Actions - STARTING prod-deploy job!"
 
+      - name: Notify ServiceNow - Job Started
+        uses: ServiceNow/servicenow-devops-change@v6.0.0
+        with:
+          instance-url: ${{ vars.SN_INSTANCE_URL }}
+          devops-integration-user-name: ${{ vars.SN_USERNAME }}
+          devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
+          tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: prod-deploy
+          job-status: "jobStarted"
+
+      - name: Simulate real deployment
+        run: |
+          echo "Deploying application..."
+          sleep 3
+          echo "Deployment completed."
+
+      - name: Notify ServiceNow - Job Completed
+        if: always()
+        uses: ServiceNow/servicenow-devops-change@v6.0.0
+        with:
+          instance-url: ${{ vars.SN_INSTANCE_URL }}
+          devops-integration-user-name: ${{ vars.SN_USERNAME }}
+          devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
+          tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: prod-deploy
+          job-status: "jobCompleted"
+          status: ${{ job.status }}
+
+      - name: Say goodbye
+        run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
