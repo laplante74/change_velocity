@@ -52,43 +52,22 @@ jobs:
         SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
         job-name: prod-deploy
-        short-description: "Automated deployment to production via GitHub Actions."
-        implementation-plan: "Automated deployment via CI/CD pipeline."
-        description: "This deployment was triggered automatically as part of the CI/CD pipeline."
+        short-description: "Prod deploy from ${{ github.repository }} by ${{ github.actor }}"
+        implementation-plan: |
+          CI/CD pipeline: ${{ github.workflow }}
+          Repo: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          Ref: ${{ github.ref }}
+        description: "Triggered by [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
         backout-plan: "Rollback to previous stable release."
         test-plan: "Verify deployment success through automated tests."
         assignment-group: "c26e367d9343a210cd38fde08bba10e3"
         assigned-to: "5edf55fd934b6210cd38fde08bba10a0"
 
-    # Step 2: Signal job started
-    - name: Notify ServiceNow - Job Started
-      uses: ServiceNow/servicenow-devops-change@v6.0.0
-      with:
-        instance-url: ${{ vars.SN_INSTANCE_URL }}
-        devops-integration-user-name: ${{ vars.SN_USERNAME }}
-        devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
-        tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-        context-github: ${{ toJSON(github) }}
-        job-name: prod-deploy
-        job-status: "jobStarted"
-
     # Simulated deployment
     - name: Deploy app
       run: echo "Fake deploy step..."
 
-    # Step 3: Signal job completed
-    - name: Notify ServiceNow - Job Completed
-      if: always()
-      uses: ServiceNow/servicenow-devops-change@v6.0.0
-      with:
-        instance-url: ${{ vars.SN_INSTANCE_URL }}
-        devops-integration-user-name: ${{ vars.SN_USERNAME }}
-        devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
-        tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-        context-github: ${{ toJSON(github) }}
-        job-name: prod-deploy
-        job-status: "jobCompleted"
-        status: ${{ job.status }}
-
+    # Complete
     - name: Say goodbye
       run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
