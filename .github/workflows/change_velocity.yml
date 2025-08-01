@@ -59,8 +59,6 @@ jobs:
           description: "This deployment was triggered automatically as part of the CI/CD pipeline."
           backout-plan: "Rollback to previous stable release."
           test-plan: "Verify deployment success through automated tests."
-          risk: "4"
-          impact: "3"
           assignment-group: "c26e367d9343a210cd38fde08bba10e3"
           assigned-to: "5edf55fd934b6210cd38fde08bba10a0"
 
