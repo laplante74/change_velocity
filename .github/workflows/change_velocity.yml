@@ -54,7 +54,7 @@ jobs:
         job-name: prod-deploy
         short-description: "Prod deploy from ${{ github.repository }} by ${{ github.actor }}"
         implementation-plan: "CI/CD pipeline: ${{ github.workflow }}; Repo: ${{ github.repository }}; SHA: ${{ github.sha }}; Ref: ${{ github.ref }}"
-        description: "Triggered by [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+        description: "Triggered by GitHub workflow: ${{ github.workflow }} in ${{ github.repository }}. Run ID: ${{ github.run_id }}"
         backout-plan: "Rollback to previous stable release."
         test-plan: "Verify deployment success through automated tests."
         assignment-group: "c26e367d9343a210cd38fde08bba10e3"
