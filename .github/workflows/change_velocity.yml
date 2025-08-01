@@ -38,67 +38,57 @@ jobs:
     runs-on: ubuntu-latest
     needs: test-job
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Trigger ServiceNow Change Control
-        uses: laplante74/laplante74-actions/servicenow-devops-change@main
-        id: change_creation
-        with:
-          SN_INSTANCE_URL: ${{ vars.SN_INSTANCE_URL }}
-          SN_USERNAME: ${{ vars.SN_USERNAME }}
-          SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
-          SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: prod-deploy
-          short-description: "Automated deployment to production via GitHub Actions."
-          implementation-plan: "Automated deployment via CI/CD pipeline."
-          description: "This deployment was triggered automatically as part of the CI/CD pipeline."
-          backout-plan: "Rollback to previous stable release."
-          test-plan: "Verify deployment success through automated tests."
-          assignment-group: "c26e367d9343a210cd38fde08bba10e3"
-          assigned-to: "5edf55fd934b6210cd38fde08bba10a0"
+    # Step 1: Create the change request
+    - name: Trigger ServiceNow Change Control
+      uses: laplante74/laplante74-actions/servicenow-devops-change@main
+      id: change_creation
+      with:
+        SN_INSTANCE_URL: ${{ vars.SN_INSTANCE_URL }}
+        SN_USERNAME: ${{ vars.SN_USERNAME }}
+        SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
+        SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name: prod-deploy
+        short-description: "Automated deployment to production via GitHub Actions."
+        implementation-plan: "Automated deployment via CI/CD pipeline."
+        description: "This deployment was triggered automatically as part of the CI/CD pipeline."
+        backout-plan: "Rollback to previous stable release."
+        test-plan: "Verify deployment success through automated tests."
+        assignment-group: "c26e367d9343a210cd38fde08bba10e3"
+        assigned-to: "5edf55fd934b6210cd38fde08bba10a0"
 
-      - name: Check if change was created
-        run: |
-          echo "Change creation result: ${{ steps.change_creation.outcome }}"
-          if [ "${{ steps.change_creation.outcome }}" != "success" ]; then
-            echo "ServiceNow Change creation failed. Failing workflow."
-            exit 1
-          fi
+    # Step 2: Signal job started
+    - name: Notify ServiceNow - Job Started
+      uses: ServiceNow/servicenow-devops-change@v6.0.0
+      with:
+        instance-url: ${{ vars.SN_INSTANCE_URL }}
+        devops-integration-user-name: ${{ vars.SN_USERNAME }}
+        devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
+        tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name: prod-deploy
+        job-status: "jobStarted"
 
-      - name: Say hello
-        run: echo "Hello from GitHub Actions - STARTING prod-deploy job!"
+    # Simulated deployment
+    - name: Deploy app
+      run: echo "Fake deploy step..."
 
-      - name: Notify ServiceNow - Job Started
-        uses: ServiceNow/servicenow-devops-change@v6.0.0
-        with:
-          instance-url: ${{ vars.SN_INSTANCE_URL }}
-          devops-integration-user-name: ${{ vars.SN_USERNAME }}
-          devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
-          tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: prod-deploy
-          job-status: "jobStarted"
+    # Step 3: Signal job completed
+    - name: Notify ServiceNow - Job Completed
+      if: always()
+      uses: ServiceNow/servicenow-devops-change@v6.0.0
+      with:
+        instance-url: ${{ vars.SN_INSTANCE_URL }}
+        devops-integration-user-name: ${{ vars.SN_USERNAME }}
+        devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
+        tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name: prod-deploy
+        job-status: "jobCompleted"
+        status: ${{ job.status }}
 
-      - name: Simulate real deployment
-        run: |
-          echo "Deploying application..."
-          sleep 3
-          echo "Deployment completed."
-
-      - name: Notify ServiceNow - Job Completed
-        if: always()
-        uses: ServiceNow/servicenow-devops-change@v6.0.0
-        with:
-          instance-url: ${{ vars.SN_INSTANCE_URL }}
-          devops-integration-user-name: ${{ vars.SN_USERNAME }}
-          devops-integration-user-password: ${{ secrets.SN_PASSWORD }}
-          tool-id: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: prod-deploy
-          job-status: "jobCompleted"
-          status: ${{ job.status }}
-
-      - name: Say goodbye
-        run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
+    - name: Say goodbye
+      run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
