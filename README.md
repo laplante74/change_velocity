@@ -2,7 +2,7 @@
 
 ### Variables alrady set FOR YOU across the JLLT-Apps organization:
 
-# <<SECRETS>>
+# SECRETS
 #
 # SN_ORCHESTRATION_TOOL_ID
 # - this is the ID associated with the Devops Change Velocity module installed into ServiceNow
@@ -11,7 +11,7 @@
 # - this is the JWT token used for authentication between the JLLT-Apps GitHub application called
 # "jllt-change-velocity" and the JLL production ServiceNow instance
 
-# <<VARIABLES>>
+# VARIABLES
 #
 # SN_INSTANCE_URL
 # - this is the URL of the JLL production ServiceNow instance
