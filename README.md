@@ -22,7 +22,7 @@ SN_INSTANCE_URL
 
 ** Variables **YOU SHOULD SET** in your repo to enhance the content of your ServiceNow change records
 
-**SN_ASSIGNMENT_GROUP_SYS_IDSN_ASSIGNMENT_GROUP_SYS_ID** (required)
+**SN_ASSIGNMENT_GROUP_SYS_ID** (required)
 -> This is the unique ID for your team's service now assignment group
 
 ****HOW DO YOU FIND YOUR TEAM's SYS ID**?
@@ -42,7 +42,7 @@ In case "Copy sys_id" isn't an option based on your ServiceNow role, try this in
 (3) - Once you find your group in the list, click the name of the group (a hyperlink).  This open group profile page.  In the brower's URL field, the sys_id will be imbedded.
 
 Example group record URL: 
-<your org name>.service-now.com/../../../sys_user_group.do%##sys_id##<your 32 char sys id>.   
+your-org-name.service-now.com/../../../sys_user_group.do%##sys_id##<your 32 char sys id>.   
   
 Please NOTE it is 32 characters long.  ServiceNow sometimes leads the actual sys_id with two characters like "3D" or "3F". Capture the next 32 characters before the next "%##".
 
@@ -68,7 +68,7 @@ In case "Copy sys_id" isn't an option based on your ServiceNow role, try this in
 (3) - Once you find your user in the list, click the name of the person (a hyperlink).  This open user profile page.  In the brower's URL field, the sys_id will be imbedded.
 
 Example group record URL: 
-<your org name>.service-now.com/../../../sys_user_.do%##sys_id##<your 32 char sys id>.   
+your-org-name.service-now.com/../../../sys_user_.do%##sys_id##<your 32 char sys id>.   
 
 Please NOTE it is 32 characters long.  ServiceNow sometimes leads the actual sys_id with two characters like "3D" or "3F". Capture the next 32 characters before the next "%##".
 
