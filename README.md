@@ -1,4 +1,4 @@
-Using DavopsChange Velocity
+Using Devops Change Velocity in ServiceNow
 
 ** Variables alrady set FOR YOU across the JLLT-Apps organization:
 
