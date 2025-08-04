@@ -73,7 +73,7 @@ jobs:
         backout-plan: "Rollback to previous stable release."
         test-plan: "Verify deployment success through automated tests."
         assignment-group: ${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}
-        assigned-to: "5edf55fd934b6210cd38fde08bba10a0"
+        assigned-to: ${{ vars.SN_ASSIGNED_TO_SYS_ID }}
         work-notes: "GitHub deployment result: ${{ env.DEPLOY_STATUS }}"
 
     # Complete
