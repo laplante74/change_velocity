@@ -49,7 +49,7 @@ jobs:
 
       - name: Create ServiceNow Change Control
         id: change_creation
-        uses: laplante74/laplante74-actions/servicenow-devops-change@jll-prod
+        uses: laplante74/laplante74-actions/servicenow-devops-change@main
         with:
           SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
           SN_USERNAME: ${{ env.SN_USERNAME }}
@@ -65,7 +65,7 @@ jobs:
           assignment-group: ${{ env.SN_ASSIGNMENT_GROUP_SYS_ID }}
           assigned-to: ${{ env.SN_ASSIGNED_TO_SYS_ID }}
           work-notes: "Change created. Deployment in progress."
-          auto-close: 'false'
+          auto_close: 'false'
 
       - name: Deploy app
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: Auto-close ServiceNow Change Request
         if: always()
-        uses: laplante74/laplante74-actions/servicenow-devops-change@jll-prod
+        uses: laplante74/laplante74-actions/servicenow-devops-change@main
         with:
           SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
           SN_USERNAME: ${{ env.SN_USERNAME }}
@@ -102,7 +102,8 @@ jobs:
           actual_end_date: ${{ env.END }}
           deploy_status: ${{ env.DEPLOY_STATUS }}
           change_request_sys_id: ${{ steps.change_creation.outputs.change_request_sys_id }}
-          auto-close: 'true'
+          auto_close: 'true'
 
       - name: Say goodbye
         run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
+
