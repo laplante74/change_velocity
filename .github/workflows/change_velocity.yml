@@ -82,24 +82,33 @@ jobs:
       if: always()
       run: echo "DEPLOY_STATUS=${{ job.status }}" >> $GITHUB_ENV
 
-    # Update & close change directly via ServiceNow API
     - name: Update and close ServiceNow change
       if: always()
       run: |
         SYS_ID="${{ steps.change_creation.outputs.change_request_sys_id }}"
         echo "Updating change request $SYS_ID in ServiceNow..."
+
+        # Map deploy status to ServiceNow fields
+        if [ "${DEPLOY_STATUS}" = "success" ]; then
+        STATE="7" # Closed Successful
+        CLOSE_CODE="successful"
+        else
+        STATE="8" # Closed Incomplete
+        CLOSE_CODE="incomplete"
+        fi
+
         curl -s -X PATCH \
-          "${{ vars.SN_INSTANCE_URL }}/api/sn_devops/devops/change/${SYS_ID}" \
-          --user "${{ vars.SN_USERNAME }}:${{ secrets.SN_PASSWORD }}" \
-          --header "Content-Type: application/json" \
-          --data "{
-            \"actual_start_date\": \"${START}\",
-            \"actual_end_date\": \"${END}\",
-            \"close_code\": \"${DEPLOY_STATUS}\",
-            \"state\": \"${DEPLOY_STATUS}\" == \"success\" ? \"closed_successful\" : \"closed_incomplete\",
-            \"autoCloseChange\": true,
-            \"work_notes\": \"GitHub deployment result: ${DEPLOY_STATUS}\"
-          }"
+        "${{ vars.SN_INSTANCE_URL }}/api/now/table/change_request/${SYS_ID}" \
+        --user "${{ vars.SN_USERNAME }}:${{ secrets.SN_PASSWORD }}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"actual_start\": \"${START}\",
+          \"actual_end\": \"${END}\",
+          \"close_code\": \"${CLOSE_CODE}\",
+          \"close_notes\": \"GitHub deployment result: ${DEPLOY_STATUS}\",
+          \"state\": \"${STATE}\"
+        }"
+
         echo "Change request updated & closed."
 
     - name: Say goodbye
