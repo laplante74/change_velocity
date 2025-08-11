@@ -47,8 +47,8 @@ jobs:
       - name: Set actual start time
         run: echo "START=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
 
-      - name: Trigger ServiceNow Change Control
-        id: change_creation
+      - name: Create ServiceNow Change Request
+        id: create_change
         uses: laplante74/laplante74-actions/servicenow-devops-change@main
         with:
           SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
@@ -80,7 +80,7 @@ jobs:
         if: always()
         run: echo "DEPLOY_STATUS=${{ job.status }}" >> $GITHUB_ENV
 
-      - name: Auto-close ServiceNow Change Request
+      - name: Close ServiceNow Change Request
         if: always()
         id: close_change
         uses: laplante74/laplante74-actions/servicenow-devops-change@main
@@ -103,6 +103,7 @@ jobs:
           actual_end_date: ${{ env.END }}
           deploy_status: ${{ env.DEPLOY_STATUS }}
           auto-close: 'true'
+          change_request_sys_id: ${{ steps.create_change.outputs.change_request_sys_id }}
 
       - name: Say goodbye
         run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
