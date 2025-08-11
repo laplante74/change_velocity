@@ -67,6 +67,12 @@ jobs:
           work-notes: "Change created. Deployment in progress."
           auto_close: 'false'
 
+      - name: Debug Change Creation Outputs
+        run: |
+          echo "Change Request Number: ${{ steps.change_creation.outputs.change_request_number }}"
+          echo "Change Request Sys ID: ${{ steps.change_creation.outputs.change_request_sys_id }}"
+          echo "Change Request URL: ${{ steps.change_creation.outputs.change_request_url }}"
+
       - name: Deploy app
         run: |
           echo "Deploying fake app..."
