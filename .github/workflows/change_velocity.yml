@@ -64,6 +64,9 @@ jobs:
         assigned-to: ${{ vars.SN_ASSIGNED_TO_SYS_ID }}
         work-notes: "Change created. Deployment in progress."
 
+    - name: Save change sys_id for later
+      run: echo "SYS_ID=${{ steps.change_creation.outputs.change_request_sys_id }}" >> $GITHUB_ENV
+
     - name: Deploy app
       run: |
         echo "Deploying fake app..."
