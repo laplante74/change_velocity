@@ -80,8 +80,7 @@ jobs:
         if: always()
         run: echo "DEPLOY_STATUS=${{ job.status }}" >> $GITHUB_ENV
 
-      - name: Auto-close ServiceNow Change Request
-        if: always()
+      - name: Close ServiceNow Change Control
         uses: laplante74/laplante74-actions/servicenow-devops-change@main
         with:
           SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
