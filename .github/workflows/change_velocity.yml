@@ -7,8 +7,7 @@ jobs:
   test-job:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Say hello
         run: echo "Hello from GitHub Actions!"
@@ -17,19 +16,16 @@ jobs:
         run: |
           echo "Installing fake dependencies..."
           sleep 2
-          echo "Fake dependencies installed"
 
       - name: Simulate running tests
         run: |
           echo "Running fake tests..."
           sleep 2
-          echo "All fake tests passed"
 
       - name: Simulate build step
         run: |
           echo "Building the fake app..."
           sleep 2
-          echo "Fake build complete"
 
       - name: Done
         run: echo "First step of workflow finished!"
@@ -37,80 +33,76 @@ jobs:
   prod-deploy:
     runs-on: ubuntu-latest
     needs: test-job
+    env:
+      SN_INSTANCE_URL: ${{ vars.SN_INSTANCE_URL }}
+      SN_USERNAME: ${{ vars.SN_USERNAME }}
+      SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
+      SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+      SN_ASSIGNMENT_GROUP_SYS_ID: ${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}
+      SN_ASSIGNED_TO_SYS_ID: ${{ vars.SN_ASSIGNED_TO_SYS_ID }}
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set actual start time
-      run: echo "START=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")" >> $GITHUB_ENV
+      - name: Set actual start time
+        run: echo "START=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
 
-    # Create the change request BEFORE deploy
-    - name: Trigger ServiceNow Change Control
-      id: change_creation
-      uses: laplante74/laplante74-actions/servicenow-devops-change@main
-      with:
-        SN_INSTANCE_URL: ${{ vars.SN_INSTANCE_URL }}
-        SN_USERNAME: ${{ vars.SN_USERNAME }}
-        SN_PASSWORD: ${{ secrets.SN_PASSWORD }}
-        SN_ORCHESTRATION_TOOL_ID: ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-        context-github: ${{ toJSON(github) }}
-        job-name: prod-deploy
-        short-description: "Prod deploy from ${{ github.repository }} by ${{ github.actor }}"
-        implementation-plan: "CI/CD pipeline: ${{ github.workflow }}; Repo: ${{ github.repository }}; SHA: ${{ github.sha }}; Ref: ${{ github.ref }}"
-        description: "Triggered by GitHub workflow: ${{ github.workflow }} in ${{ github.repository }}. Run ID: ${{ github.run_id }}"
-        backout-plan: "Rollback to previous stable release."
-        test-plan: "Verify deployment success through automated tests."
-        assignment-group: ${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}
-        assigned-to: ${{ vars.SN_ASSIGNED_TO_SYS_ID }}
-        work-notes: "Change created. Deployment in progress."
+      - name: Trigger ServiceNow Change Control
+        id: change_creation
+        uses: laplante74/laplante74-actions/servicenow-devops-change@main
+        with:
+          SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
+          SN_USERNAME: ${{ env.SN_USERNAME }}
+          SN_PASSWORD: ${{ env.SN_PASSWORD }}
+          SN_ORCHESTRATION_TOOL_ID: ${{ env.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: prod-deploy
+          short-description: "Prod deploy from ${{ github.repository }} by ${{ github.actor }}"
+          implementation-plan: "CI/CD pipeline: ${{ github.workflow }}; Repo: ${{ github.repository }}; SHA: ${{ github.sha }}; Ref: ${{ github.ref }}"
+          description: "Triggered by GitHub workflow: ${{ github.workflow }} in ${{ github.repository }}. Run ID: ${{ github.run_id }}"
+          backout-plan: "Rollback to previous stable release."
+          test-plan: "Verify deployment success through automated tests."
+          assignment-group: ${{ env.SN_ASSIGNMENT_GROUP_SYS_ID }}
+          assigned-to: ${{ env.SN_ASSIGNED_TO_SYS_ID }}
+          work-notes: "Change created. Deployment in progress."
+          auto-close: 'false'
 
-    - name: Save change sys_id for later
-      run: echo "SYS_ID=${{ steps.change_creation.outputs.change_request_sys_id }}" >> $GITHUB_ENV
+      - name: Deploy app
+        run: |
+          echo "Deploying fake app..."
+          sleep 10
+          echo "Fake deploy done"
 
-    - name: Deploy app
-      run: |
-        echo "Deploying fake app..."
-        echo "Injecting fake 10 second sleep.."
-        sleep 10
-        echo "Fake deploy done"
-        # Simulate failure if needed with: exit 1
+      - name: Set actual end time
+        run: echo "END=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
 
-    - name: Set actual end time
-      run: echo "END=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")" >> $GITHUB_ENV
+      - name: Capture deploy status
+        if: always()
+        run: echo "DEPLOY_STATUS=${{ job.status }}" >> $GITHUB_ENV
 
-    - name: Capture deploy status
-      if: always()
-      run: echo "DEPLOY_STATUS=${{ job.status }}" >> $GITHUB_ENV
+      - name: Auto-close ServiceNow Change Request
+        if: always()
+        id: close_change
+        uses: laplante74/laplante74-actions/servicenow-devops-change@main
+        with:
+          SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
+          SN_USERNAME: ${{ env.SN_USERNAME }}
+          SN_PASSWORD: ${{ env.SN_PASSWORD }}
+          SN_ORCHESTRATION_TOOL_ID: ${{ env.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: prod-deploy
+          short-description: "Closing Change Request"
+          description: "Closing change request after deployment run."
+          implementation-plan: "N/A"
+          backout-plan: "N/A"
+          test-plan: "N/A"
+          assignment-group: ${{ env.SN_ASSIGNMENT_GROUP_SYS_ID }}
+          assigned-to: ${{ env.SN_ASSIGNED_TO_SYS_ID }}
+          work-notes: "Deployment finished with status: ${{ env.DEPLOY_STATUS }}"
+          actual_start_date: ${{ env.START }}
+          actual_end_date: ${{ env.END }}
+          deploy_status: ${{ env.DEPLOY_STATUS }}
+          auto-close: 'true'
 
-    - name: Update and close ServiceNow change
-      if: always()
-      run: |
-        SYS_ID="${{ steps.change_creation.outputs.change_request_sys_id }}"
-        echo "Updating change request $SYS_ID in ServiceNow..."
-
-        # Map deploy status to ServiceNow fields
-        if [ "${DEPLOY_STATUS}" = "success" ]; then
-        STATE="7" # Closed Successful
-        CLOSE_CODE="successful"
-        else
-        STATE="8" # Closed Incomplete
-        CLOSE_CODE="incomplete"
-        fi
-
-        curl -s -X PATCH \
-        "${{ vars.SN_INSTANCE_URL }}/api/now/table/change_request/${SYS_ID}" \
-        --user "${{ vars.SN_USERNAME }}:${{ secrets.SN_PASSWORD }}" \
-        --header "Content-Type: application/json" \
-        --data "{
-          \"actual_start\": \"${START}\",
-          \"actual_end\": \"${END}\",
-          \"close_code\": \"${CLOSE_CODE}\",
-          \"close_notes\": \"GitHub deployment result: ${DEPLOY_STATUS}\",
-          \"state\": \"${STATE}\"
-        }"
-
-        echo "Change request updated & closed."
-
-    - name: Say goodbye
-      run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
-
+      - name: Say goodbye
+        run: echo "Goodbye from GitHub Actions - FINISHING prod-deploy job!"
