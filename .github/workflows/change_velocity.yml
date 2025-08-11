@@ -82,7 +82,7 @@ jobs:
 
       - name: Auto-close ServiceNow Change Request
         if: always()
-        uses: laplante74/laplante74-actions/servicenow-devops-change@v2.0.0
+        uses: laplante74/laplante74-actions/servicenow-devops-change@jll-prod
         with:
           SN_INSTANCE_URL: ${{ env.SN_INSTANCE_URL }}
           SN_USERNAME: ${{ env.SN_USERNAME }}
