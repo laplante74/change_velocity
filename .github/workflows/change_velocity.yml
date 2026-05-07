@@ -36,7 +36,7 @@ jobs:
         id: sn-create
         # CHANGED: @main → @fix/token-auth-align (your working branch).
         # After you merge and tag, this becomes @v1.
-        uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-auth-align
+        uses: laplante74/laplante74-actions/servicenow-devops-change@v1
         with:
           SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
           SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
