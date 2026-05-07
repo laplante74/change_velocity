@@ -78,7 +78,8 @@ jobs:
           actual_start_date:    ${{ env.DEPLOY_START }}
           actual_end_date:      ${{ env.DEPLOY_END }}
           deploy_status:        ${{ env.DEPLOY_STATUS }}
-          change_request_sys_id: ${{ steps.sn-create.outputs.change_request_sys_id }}
+          change_request_sys_id:    ${{ steps.sn-create.outputs.change_request_sys_id }}
+          change_request_number:    ${{ steps.sn-create.outputs.change_request_number }}
           auto_close:           'true'
 
       - name: Done
