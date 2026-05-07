@@ -19,10 +19,6 @@ jobs:
   prod-deploy:
     runs-on: ubuntu-latest
     needs: test-job
-    # CHANGED: removed the job-level env block — vars/secrets are now
-    # referenced directly in each step's `with:` block. This avoids a
-    # known GitHub Actions quirk where env vars are not always resolved
-    # correctly when passed into composite action inputs.
 
     steps:
       - name: Checkout code
@@ -31,12 +27,9 @@ jobs:
       - name: Set deployment start time
         run: echo "DEPLOY_START=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
 
-      # ── CREATE CHANGE ──────────────────────────────────────────────────
       - name: Create ServiceNow change
         id: sn-create
-        # CHANGED: @main → @fix/token-auth-align (your working branch).
-        # After you merge and tag, this becomes @v1.
-        uses: laplante74/laplante74-actions/servicenow-devops-change@v1
+        uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-contract-cleanup
         with:
           SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
           SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
@@ -52,26 +45,21 @@ jobs:
           work-notes:          "Change created — deployment starting"
           auto_close:          'false'
 
-      # ── DEPLOY ─────────────────────────────────────────────────────────
       - name: Deploy app
         run: |
           echo "Deploying fake app..."
           sleep 5
           echo "Deployment complete"
 
-      # ── CAPTURE END TIME + STATUS ───────────────────────────────────────
       - name: Set deployment end time and status
         if: always()
         run: |
           echo "DEPLOY_END=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
-          # CHANGED: job.status captured here in the same step as the
-          # end time, so both env vars are set before the close step runs.
           echo "DEPLOY_STATUS=${{ job.status }}"              >> "$GITHUB_ENV"
 
-      # ── CLOSE CHANGE ────────────────────────────────────────────────────
       - name: Close ServiceNow change
         if: always()
-        uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-auth-align
+        uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-contract-cleanup
         with:
           SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
           SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
