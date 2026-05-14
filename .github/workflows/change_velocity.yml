@@ -24,27 +24,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set deployment start time
-        run: echo "DEPLOY_START=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
-
-      - name: Create ServiceNow change
-        id: sn-create
-        uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-contract-cleanup
+      - name: ServiceNow Change Gate
+        uses: ServiceNow/servicenow-devops-change@v5.1.0
+        id: sn-change
         with:
-          SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
-          SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-          SN_DEVOPS_INTEGRATION_TOKEN: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
-          context-github:              ${{ toJSON(github) }}
-          job-name:            prod-deploy
-          short-description:   "Prod deploy — ${{ github.repository }} @ ${{ github.sha }}"
-          description:         "Triggered by ${{ github.actor }} · run ${{ github.run_id }}"
-          implementation-plan: "Deploy via GitHub Actions. SHA: ${{ github.sha }}"
-          backout-plan:        "Rollback to last stable release"
-          test-plan:           "Automated pipeline validation"
-          assignment-group:    ${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}
-          assigned-to:         ${{ vars.SN_ASSIGNED_TO_SYS_ID }}
-          work-notes:          "Change created — deployment starting"
-          auto_close:          'false'
+          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          instance-url:             ${{ vars.SN_INSTANCE_URL }}
+          tool-id:                  ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+          context-github:           ${{ toJSON(github) }}
+          job-name:                 'prod-deploy'
+          change-request: >-
+            {"setCloseCode":"true","autoCloseChange":true,"attributes":{"short_description":"Prod deploy — ${{ github.repository }} @ ${{ github.sha }}","description":"Triggered by ${{ github.actor }} run ${{ github.run_id }}","implementation_plan":"Deploy via GitHub Actions SHA ${{ github.sha }}","backout_plan":"Rollback to last stable release","test_plan":"Automated pipeline validation","assignment_group":"${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}","assigned_to":"${{ vars.SN_ASSIGNED_TO_SYS_ID }}"}}
+          interval: '10'
+          timeout: '3600'
+          changeCreationTimeOut: '3600'
+          abortOnChangeCreationFailure: true
+          abortOnChangeStepTimeout: true
 
       - name: Deploy app
         run: |
@@ -52,54 +47,5 @@ jobs:
           sleep 5
           echo "Deployment complete"
 
-      - name: Set deployment end time and status
-        if: always()
-        run: |
-          echo "DEPLOY_END=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
-          echo "DEPLOY_STATUS=${{ job.status }}"              >> "$GITHUB_ENV"
-
-      - name: Debug - Test SN API directly
-        if: always()
-        env:
-          SN_TOKEN: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
-          SN_TOOL:  ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-          SN_URL:   ${{ vars.SN_INSTANCE_URL }}
-        run: |
-          echo "Testing GET first..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X GET \
-            "${SN_URL}/api/sn_devops/devops/change/request?changeRequestNumber=${{ steps.sn-create.outputs.change_request_number }}" \
-            -H "Content-Type: application/json" \
-            -H "devops-integration-token: ${SN_TOKEN}" \
-            -H "tool-id: ${SN_TOOL}")
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -1)
-          echo "GET HTTP status: ${HTTP_CODE}"
-          echo "GET Response: ${BODY}"
-
-      - name: Close ServiceNow change
-        if: always()
-        uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-contract-cleanup
-        with:
-          SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
-          SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
-          SN_DEVOPS_INTEGRATION_TOKEN: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
-          context-github:              ${{ toJSON(github) }}
-          job-name:             prod-deploy
-          short-description:    "Closing change after deployment"
-          description:          "Deployment result: ${{ env.DEPLOY_STATUS }}"
-          implementation-plan:  "N/A"
-          backout-plan:         "N/A"
-          test-plan:            "N/A"
-          assignment-group:     ${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}
-          assigned-to:          ${{ vars.SN_ASSIGNED_TO_SYS_ID }}
-          work-notes:           "Final status: ${{ env.DEPLOY_STATUS }}"
-          actual_start_date:    ${{ env.DEPLOY_START }}
-          actual_end_date:      ${{ env.DEPLOY_END }}
-          deploy_status:        ${{ env.DEPLOY_STATUS }}
-          change_request_sys_id:    ${{ steps.sn-create.outputs.change_request_sys_id }}
-          change_request_number:    ${{ steps.sn-create.outputs.change_request_number }}
-          auto_close:           'true'
-
       - name: Done
-        if: always()
         run: echo "Deployment + change lifecycle complete"
