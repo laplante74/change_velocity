@@ -58,6 +58,24 @@ jobs:
           echo "DEPLOY_END=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
           echo "DEPLOY_STATUS=${{ job.status }}"              >> "$GITHUB_ENV"
 
+      - name: Debug - Test SN API directly
+        if: always()
+        env:
+          SN_TOKEN: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          SN_TOOL:  ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
+          SN_URL:   ${{ vars.SN_INSTANCE_URL }}
+        run: |
+          echo "Testing GET first..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X GET \
+            "${SN_URL}/api/sn_devops/devops/change/request?changeRequestNumber=${{ steps.sn-create.outputs.change_request_number }}" \
+            -H "Content-Type: application/json" \
+            -H "devops-integration-token: ${SN_TOKEN}" \
+            -H "tool-id: ${SN_TOOL}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
+          echo "GET HTTP status: ${HTTP_CODE}"
+          echo "GET Response: ${BODY}"
+
       - name: Close ServiceNow change
         if: always()
         uses: laplante74/laplante74-actions/servicenow-devops-change@fix/token-contract-cleanup
