@@ -34,6 +34,8 @@ jobs:
           SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
           SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
           SN_DEVOPS_INTEGRATION_TOKEN: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          SN_OAUTH_CLIENT_ID:          ${{ vars.SN_OAUTH_CLIENT_ID }}
+          SN_OAUTH_CLIENT_SECRET:      ${{ secrets.SN_OAUTH_CLIENT_SECRET }}
           context-github:              ${{ toJSON(github) }}
           job-name:            prod-deploy
           short-description:   "Prod deploy — ${{ github.repository }} @ ${{ github.sha }}"
@@ -65,6 +67,8 @@ jobs:
           SN_INSTANCE_URL:             ${{ vars.SN_INSTANCE_URL }}
           SN_ORCHESTRATION_TOOL_ID:    ${{ vars.SN_ORCHESTRATION_TOOL_ID }}
           SN_DEVOPS_INTEGRATION_TOKEN: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          SN_OAUTH_CLIENT_ID:          ${{ vars.SN_OAUTH_CLIENT_ID }}
+          SN_OAUTH_CLIENT_SECRET:      ${{ secrets.SN_OAUTH_CLIENT_SECRET }}
           context-github:              ${{ toJSON(github) }}
           job-name:             prod-deploy
           short-description:    "Closing change after deployment"
