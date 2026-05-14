@@ -34,7 +34,7 @@ jobs:
           context-github:           ${{ toJSON(github) }}
           job-name:                 'prod-deploy'
           change-request: >-
-            {"setCloseCode":"true","autoCloseChange":true,"attributes":{"short_description":"Prod deploy — ${{ github.repository }} @ ${{ github.sha }}","description":"Triggered by ${{ github.actor }} run ${{ github.run_id }}","implementation_plan":"Deploy via GitHub Actions SHA ${{ github.sha }}","backout_plan":"Rollback to last stable release","test_plan":"Automated pipeline validation","assignment_group":"${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}","assigned_to":"${{ vars.SN_ASSIGNED_TO_SYS_ID }}"}}
+            {"setCloseCode":"true","autoCloseChange":true,"closeCode":"successful","closeNotes":"Automated deployment completed via GitHub Actions","attributes":{"short_description":"Prod deploy — ${{ github.repository }} @ ${{ github.sha }}","description":"Triggered by ${{ github.actor }} run ${{ github.run_id }}","implementation_plan":"Deploy via GitHub Actions SHA ${{ github.sha }}","backout_plan":"Rollback to last stable release","test_plan":"Automated pipeline validation","assignment_group":"${{ vars.SN_ASSIGNMENT_GROUP_SYS_ID }}","assigned_to":"${{ vars.SN_ASSIGNED_TO_SYS_ID }}"}}
           interval: '10'
           timeout: '3600'
           changeCreationTimeOut: '3600'
